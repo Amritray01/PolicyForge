@@ -13,14 +13,14 @@ services:
 
   # Backend Services
   Backend-Stable:
-    image: ghcr.io/${GITHUB_REPOSITORY:-policyforge/policyforge}/backend:stable
+    image: ghcr.io/aadityarj01/policyforge/backend:stable
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/policyforge
     depends_on:
       - db
 
   Backend-Canary:
-    image: ghcr.io/${GITHUB_REPOSITORY:-policyforge/policyforge}/backend:canary
+    image: ghcr.io/aadityarj01/policyforge/backend:canary
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/policyforge
     depends_on:
@@ -28,10 +28,10 @@ services:
 
   # Frontend Services (Representing "App")
   App-Stable:
-    image: ghcr.io/${GITHUB_REPOSITORY:-policyforge/policyforge}/frontend:stable
+    image: ghcr.io/aadityarj01/policyforge/frontend:stable
 
   App-Canary:
-    image: ghcr.io/${GITHUB_REPOSITORY:-policyforge/policyforge}/frontend:canary
+    image: ghcr.io/aadityarj01/policyforge/frontend:canary
 
   # Proxy
   Nginx-Proxy:
