@@ -21,6 +21,7 @@ jobs:
           # This fetches the entire history so Gitleaks 
           # can find the commits it needs to scan.
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
