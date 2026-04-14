@@ -5,7 +5,6 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-
 const crypto = require('crypto');
 
 const getUserSecret = (userId) => {
