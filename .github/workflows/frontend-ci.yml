@@ -1,0 +1,65 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      - main
+      - v2
+
+jobs:
+  frontend-ci:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      # ---------------- Security ----------------
+
+      - name: npm audit (initial check)
+        run: npm audit || true
+
+      - name: Auto-fix vulnerabilities
+        run: npm audit fix || true
+
+      - name: npm audit (fail on high/critical)
+        run: npm audit --audit-level=high
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: --no-git --redact --exit-code=2
+
+      # ---------------- Lint (NON-BLOCKING) ----------------
+
+      - name: Run ESLint (generate report)
+        run: |
+          npx eslint . -f json -o eslint-report.json || true
+
+      - name: Show Lint Report (summary)
+        run: |
+          echo "Lint report:"
+          cat eslint-report.json || echo "No report generated"
+
+      - name: Upload Lint Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-report
+          path: frontend/eslint-report.json
+
+      # ---------------- Build ----------------
+
+      - name: Build
+        run: npm run build
