@@ -8,14 +8,37 @@ import { useAuth } from '../context/AuthContext';
 import { wellnessAPI, studentAPI } from '../services/api';
 import { LogOut, RefreshCw, TrendingDown, TrendingUp, Calendar, BookOpen, Activity, Zap, Brain, Home, Briefcase, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
+
+/* ── React Bits Inspired Aurora Background ── */
+const AuroraBackground = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[#050B14]">
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+    <motion.div
+      animate={{ x: [0, 100, -50, 0], y: [0, -50, 100, 0], scale: [1, 1.2, 0.9, 1] }}
+      transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+      className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full opacity-40 blur-[100px] mix-blend-screen bg-blue-600"
+    />
+    <motion.div
+      animate={{ x: [0, -100, 50, 0], y: [0, 50, -100, 0], scale: [1, 1.5, 0.8, 1] }}
+      transition={{ duration: 20, repeat: Infinity, ease: "linear", delay: 2 }}
+      className="absolute top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full opacity-30 blur-[120px] mix-blend-screen bg-cyan-500"
+    />
+    <motion.div
+      animate={{ x: [0, 50, -50, 0], y: [0, 100, -50, 0], scale: [1, 0.8, 1.1, 1] }}
+      transition={{ duration: 18, repeat: Infinity, ease: "linear", delay: 4 }}
+      className="absolute -bottom-[20%] left-[20%] w-[60%] h-[40%] rounded-full opacity-30 blur-[100px] mix-blend-screen bg-indigo-600"
+    />
+  </div>
+);
 
 // ── Wellness score → status ────────────────────────────────────────────────
 const getWellnessStatus = (score) => {
-  if (score <= 20) return { label: 'Excellent',        color: '#10B981' };
-  if (score <= 40) return { label: 'Stable',           color: '#34D399' };
+  if (score <= 20) return { label: 'Excellent', color: '#63d33eff' };
+  if (score <= 40) return { label: 'Stable', color: '#34D399' };
   if (score <= 60) return { label: 'Moderate Concern', color: '#FBBF24' };
-  if (score <= 80) return { label: 'High Stress',      color: '#F97316' };
-  return             { label: 'Critical',              color: '#EF4444' };
+  if (score <= 80) return { label: 'High Stress', color: '#e27f29b9' };
+  return { label: 'Critical', color: '#cc1212ff' };
 };
 
 const getMotivationalMessage = (score) => {
@@ -134,11 +157,11 @@ const StudentDashboard = () => {
 
   if (loading || !student) {
     return (
-      <div className="min-h-screen flex items-center justify-center app-bg">
+      <div className="min-h-screen flex items-center justify-center bg-[#050B14]">
         <div className="glass p-10 text-center">
           <div className="relative w-14 h-14 mx-auto mb-5">
             <div className="absolute inset-0 rounded-full border-2 border-white/10" />
-            <div className="absolute inset-0 rounded-full border-2 border-t-violet-400 border-r-cyan-400 animate-spin" />
+            <div className="absolute inset-0 rounded-full border-2 border-t-blue-500 border-r-orange-500 animate-spin" />
             <Activity className="absolute inset-0 m-auto text-white/50" size={20} />
           </div>
           <p className="text-white/60 text-sm font-medium">Loading your wellness dashboard…</p>
@@ -151,153 +174,168 @@ const StudentDashboard = () => {
   const { label: wellnessLabel, color: wellnessColor } = getWellnessStatus(wellnessScore);
 
   return (
-    <div className="min-h-screen app-bg text-white pb-16">
-      {/* Nav */}
-      <nav className="glass sticky top-0 z-50 px-6 py-3 rounded-none border-b-0 shadow-2xl">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-              style={{ background: `linear-gradient(135deg, ${wellnessColor}aa, ${wellnessColor}55)`, boxShadow: `0 0 14px ${wellnessColor}40` }}>
-              <Activity size={15} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-base font-black tracking-tight leading-none">Campus Wellness Portal</h1>
-              <p className="text-[10px] text-white/40 mt-0.5">Welcome back, <span className="text-white/70 font-semibold">{student.name}</span></p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => navigate('/student/support')}
-              className="flex items-center gap-2 bg-violet-500/15 hover:bg-violet-500/25 px-3 py-1.5 rounded-xl transition border border-violet-500/30 text-sm font-medium text-violet-300">
-              <MessageCircle size={14} /> Support
-            </button>
-            <button onClick={logout} className="flex items-center gap-2 bg-white/8 hover:bg-white/14 px-4 py-1.5 rounded-xl transition border border-white/12 text-sm font-medium">
-              <LogOut size={15} /> Logout
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-5xl mx-auto px-4 pt-8 space-y-6">
-        {/* Hero card */}
-        <div className="glass-strong p-8 relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 70% 60% at 50% 0%, ${wellnessColor}18 0%, transparent 70%)` }} />
-          <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8">
-            {/* Ring */}
-            <div className="flex-shrink-0 flex flex-col items-center gap-3">
-              <WellnessRing score={wellnessScore} color={wellnessColor} />
-              <div className="text-center">
-                <p className="text-sm font-bold" style={{ color: wellnessColor }}>{wellnessLabel}</p>
-                <p className="text-[10px] text-white/35 font-black uppercase tracking-widest mt-1">Wellness Index</p>
+    <div className="relative min-h-screen text-white pb-16 overflow-hidden bg-[#050B14]">
+      <AuroraBackground />
+      <div className="relative z-10">
+        {/* Nav */}
+        <nav className="glass sticky top-0 z-50 px-6 py-3 rounded-none border-b-0 shadow-2xl">
+          <div className="max-w-5xl mx-auto flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: `linear-gradient(135deg, ${wellnessColor}aa, ${wellnessColor}55)`, boxShadow: `0 0 14px ${wellnessColor}40` }}>
+                <Activity size={15} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-base font-black tracking-tight leading-none">Campus Wellness Portal</h1>
+                <p className="text-[10px] text-white/40 mt-0.5">Welcome back, <span className="text-white/70 font-semibold">{student.name}</span></p>
               </div>
             </div>
-
-            <div className="flex-1 w-full">
-              {/* Motivational message */}
-              <div className="rounded-2xl p-5 mb-5" style={{ background: `${wellnessColor}10`, border: `1px solid ${wellnessColor}30` }}>
-                <p className="text-sm text-white/85 leading-relaxed italic">"{getMotivationalMessage(wellnessScore)}"</p>
-              </div>
-
-              {/* Domain scores from latest assessment */}
-              {latestAssessment ? (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-5">
-                  <DomainCard icon={Brain} label="Mental" score={Math.round(latestAssessment.mentalScore)} color="#8b78ff" delay={0} />
-                  <DomainCard icon={BookOpen} label="Academic" score={Math.round(latestAssessment.academicScore)} color="#22d3ee" delay={60} />
-                  <DomainCard icon={Home} label="Hostel" score={Math.round(latestAssessment.hostelScore)} color="#34D399" delay={120} />
-                  <DomainCard icon={Briefcase} label="Placement" score={Math.round(latestAssessment.placementScore)} color="#FBBF24" delay={180} />
-                  <DomainCard icon={Zap} label="Lifestyle" score={Math.round(latestAssessment.lifestyleScore)} color="#F97316" delay={240} />
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-                  <div className="stat-box-v2"><p className="stat-box-label">Last Check-in</p><p className="stat-box-value">Never</p></div>
-                  <div className="stat-box-v2"><p className="stat-box-label">Course</p><p className="stat-box-value">{student.course}</p></div>
-                  <div className="stat-box-v2"><p className="stat-box-label">CGPA</p><p className="stat-box-value">{student.cgpa}</p></div>
-                  <div className="stat-box-v2"><p className="stat-box-label">Check-ins</p><p className="stat-box-value">{student.totalAssessments}</p></div>
-                </div>
-              )}
-
-              {/* Stat row */}
-              <div className="grid grid-cols-4 gap-2 mb-4 text-center">
-                {[
-                  { icon: Calendar, label: 'Last Check-in', value: student.lastAssessmentDate ? format(new Date(student.lastAssessmentDate), 'MMM d') : 'Never' },
-                  { icon: BookOpen, label: 'Course', value: student.course?.split(' ').slice(-1)[0] },
-                  { icon: TrendingUp, label: 'CGPA', value: student.cgpa },
-                  { icon: Activity, label: 'Check-ins', value: student.totalAssessments },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="bg-white/5 rounded-xl p-2.5 border border-white/8">
-                    <Icon size={12} className="mx-auto text-white/40 mb-1" />
-                    <p className="text-[8px] text-white/35 font-bold uppercase tracking-wider mb-0.5">{label}</p>
-                    <p className="text-sm font-black text-white/90">{value ?? '—'}</p>
-                  </div>
-                ))}
-              </div>
-
-              <button onClick={() => navigate('/student/assessment')}
-                className="w-full py-3.5 rounded-2xl font-black text-sm tracking-wide flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
-                style={{ background: 'linear-gradient(135deg, #fff 0%, #e8e4ff 100%)', color: '#2d1b8f', boxShadow: '0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
-                <RefreshCw size={17} />
-                {student.totalAssessments > 0 ? 'Update My Wellness Assessment' : 'Take First Wellness Assessment'}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* History */}
-          <div className="lg:col-span-2">
-            <div className="glass p-6 h-full">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-base font-black flex items-center gap-2"><TrendingDown size={18} className="text-white/60" /> Wellness History</h3>
-                <span className="text-[10px] font-mono text-white/30">{assessmentHistory.length} records</span>
-              </div>
-              {assessmentHistory.length > 0 ? (
-                <div className="space-y-2">
-                  {assessmentHistory.map((a, i) => (
-                    <HistoryItem key={a.id || i} assessment={a} index={i} total={assessmentHistory.length} />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-white/25">
-                  <Activity size={32} className="mb-3 opacity-40" />
-                  <p className="text-sm">No assessments yet.</p>
-                  <p className="text-xs mt-1">Take your first wellness check-in above.</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-4">
-            {/* Wellness Guide */}
-            <div className="glass p-5">
-              <h3 className="text-xs font-black uppercase tracking-widest text-white/50 mb-4">Student Wellness Index</h3>
-              <div className="space-y-2">
-                {[
-                  { label: 'Excellent', range: '0–20', color: '#10B981' },
-                  { label: 'Stable', range: '21–40', color: '#34D399' },
-                  { label: 'Moderate Concern', range: '41–60', color: '#FBBF24' },
-                  { label: 'High Stress', range: '61–80', color: '#F97316' },
-                  { label: 'Critical', range: '81–100', color: '#EF4444' },
-                ].map(({ label, range, color }) => (
-                  <div key={label} className="flex items-center gap-3 p-2.5 rounded-xl transition-all"
-                    style={{ background: wellnessLabel === label ? `${color}12` : 'rgba(255,255,255,0.03)', border: `1px solid ${wellnessLabel === label ? color + '35' : 'rgba(255,255,255,0.06)'}` }}>
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
-                    <p className="text-xs font-semibold text-white/75 flex-1">{label}</p>
-                    <span className="text-[9px] font-mono text-white/30">{range}</span>
-                    {wellnessLabel === label && <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color, background: `${color}20` }}>You</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Support CTA */}
-            <div className="glass p-5" style={{ border: '1px solid rgba(139,120,255,0.2)', background: 'rgba(139,120,255,0.06)' }}>
-              <p className="text-xs font-black uppercase tracking-widest text-violet-300/70 mb-2">Need Support?</p>
-              <p className="text-xs text-white/50 mb-4 leading-relaxed">Confidential help is always available. Submit a support request and our team will respond within 24 hours.</p>
+            <div className="flex items-center gap-2">
               <button onClick={() => navigate('/student/support')}
-                className="w-full text-center text-xs font-bold py-2.5 px-4 rounded-xl transition-all"
-                style={{ background: 'rgba(139,120,255,0.15)', border: '1px solid rgba(139,120,255,0.3)', color: '#a78bfa' }}>
-                Request Support →
+                className="flex items-center gap-2 bg-blue-500/15 hover:bg-blue-500/25 px-3 py-1.5 rounded-xl transition border border-blue-500/30 text-sm font-medium text-blue-300">
+                <MessageCircle size={14} /> Support
               </button>
+              <button onClick={logout} className="flex items-center gap-2 bg-white/8 hover:bg-white/14 px-4 py-1.5 rounded-xl transition border border-white/12 text-sm font-medium">
+                <LogOut size={15} /> Logout
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        <div className="max-w-5xl mx-auto px-4 pt-8 space-y-6">
+          {/* Hero card */}
+          <div className="glow-card p-8">
+            <div className="glow-content">
+              <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 70% 60% at 50% 0%, ${wellnessColor}18 0%, transparent 70%)` }} />
+              <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8">
+                {/* Ring */}
+                <div className="flex-shrink-0 flex flex-col items-center gap-3">
+                  <WellnessRing score={wellnessScore} color={wellnessColor} />
+                  <div className="text-center">
+                    <p className="text-sm font-bold" style={{ color: wellnessColor }}>{wellnessLabel}</p>
+                    <p className="text-[10px] text-white/35 font-black uppercase tracking-widest mt-1">Wellness Index</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 w-full">
+                  {/* Motivational message */}
+                  <div className="rounded-2xl p-5 mb-5 glow-input" style={{ background: `${wellnessColor}10`, border: `1px solid ${wellnessColor}30` }}>
+                    <div className="glow-content">
+                      <p className="text-sm text-white/85 leading-relaxed italic">"{getMotivationalMessage(wellnessScore)}"</p>
+                    </div>
+                  </div>
+
+                  {/* Domain scores from latest assessment */}
+                  {latestAssessment ? (
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-5">
+                      <DomainCard icon={Brain} label="Mental" score={Math.round(latestAssessment.mentalScore)} color="#3B82F6" delay={0} />
+                      <DomainCard icon={BookOpen} label="Academic" score={Math.round(latestAssessment.academicScore)} color="#F97316" delay={60} />
+                      <DomainCard icon={Home} label="Hostel" score={Math.round(latestAssessment.hostelScore)} color="#EF4444" delay={120} />
+                      <DomainCard icon={Briefcase} label="Placement" score={Math.round(latestAssessment.placementScore)} color="#FBBF24" delay={180} />
+                      <DomainCard icon={Zap} label="Lifestyle" score={Math.round(latestAssessment.lifestyleScore)} color="#F97316" delay={240} />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                      <div className="stat-box-v2"><p className="stat-box-label">Last Check-in</p><p className="stat-box-value">Never</p></div>
+                      <div className="stat-box-v2"><p className="stat-box-label">Course</p><p className="stat-box-value">{student.course}</p></div>
+                      <div className="stat-box-v2"><p className="stat-box-label">CGPA</p><p className="stat-box-value">{student.cgpa}</p></div>
+                      <div className="stat-box-v2"><p className="stat-box-label">Check-ins</p><p className="stat-box-value">{student.totalAssessments}</p></div>
+                    </div>
+                  )}
+
+                  {/* Stat row */}
+                  <div className="grid grid-cols-4 gap-2 mb-4 text-center">
+                    {[
+                      { icon: Calendar, label: 'Last Check-in', value: student.lastAssessmentDate ? format(new Date(student.lastAssessmentDate), 'MMM d') : 'Never' },
+                      { icon: BookOpen, label: 'Course', value: student.course?.split(' ').slice(-1)[0] },
+                      { icon: TrendingUp, label: 'CGPA', value: student.cgpa },
+                      { icon: Activity, label: 'Check-ins', value: student.totalAssessments },
+                    ].map(({ icon: Icon, label, value }) => (
+                      <div key={label} className="bg-white/5 rounded-xl p-2.5 border border-white/8 glow-input">
+                        <div className="glow-content">
+                          <Icon size={12} className="mx-auto text-white/40 mb-1" />
+                          <p className="text-[8px] text-white/35 font-bold uppercase tracking-wider mb-0.5">{label}</p>
+                          <p className="text-sm font-black text-white/90">{value ?? '—'}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button onClick={() => navigate('/student/assessment')}
+                    className="w-full py-3.5 rounded-2xl font-black text-sm tracking-wide flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
+                    style={{ background: 'linear-gradient(135deg, #fff 0%, #eff6ff 100%)', color: '#1e3a8a', boxShadow: '0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8)' }}>
+                    <RefreshCw size={17} />
+                    {student.totalAssessments > 0 ? 'Update My Wellness Assessment' : 'Take First Wellness Assessment'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* History */}
+            <div className="lg:col-span-2">
+              <div className="glow-card p-6 h-full">
+                <div className="glow-content">
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-base font-black flex items-center gap-2"><TrendingDown size={18} className="text-white/60" /> Wellness History</h3>
+                    <span className="text-[10px] font-mono text-white/30">{assessmentHistory.length} records</span>
+                  </div>
+                  {assessmentHistory.length > 0 ? (
+                    <div className="space-y-2">
+                      {assessmentHistory.map((a, i) => (
+                        <HistoryItem key={a.id || i} assessment={a} index={i} total={assessmentHistory.length} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-16 text-white/25">
+                      <Activity size={32} className="mb-3 opacity-40" />
+                      <p className="text-sm">No assessments yet.</p>
+                      <p className="text-xs mt-1">Take your first wellness check-in above.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-4">
+              {/* Wellness Guide */}
+              <div className="glow-card p-5">
+                <div className="glow-content">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-white/50 mb-4">Student Wellness Index</h3>
+                  <div className="space-y-2">
+                    {[
+                      { label: 'Excellent', range: '0–20', color: '#10B981' },
+                      { label: 'Stable', range: '21–40', color: '#34D399' },
+                      { label: 'Moderate Concern', range: '41–60', color: '#FBBF24' },
+                      { label: 'High Stress', range: '61–80', color: '#F97316' },
+                      { label: 'Critical', range: '81–100', color: '#EF4444' },
+                    ].map(({ label, range, color }) => (
+                      <div key={label} className="flex items-center gap-3 p-2.5 rounded-xl transition-all"
+                        style={{ background: wellnessLabel === label ? `${color}12` : 'rgba(255,255,255,0.03)', border: `1px solid ${wellnessLabel === label ? color + '35' : 'rgba(255,255,255,0.06)'}` }}>
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
+                        <p className="text-xs font-semibold text-white/75 flex-1">{label}</p>
+                        <span className="text-[9px] font-mono text-white/30">{range}</span>
+                        {wellnessLabel === label && <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color, background: `${color}20` }}>You</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Support CTA */}
+              <div className="glow-card p-5" style={{ border: '1px solid rgba(59,130,246,0.2)', background: 'rgba(59,130,246,0.06)' }}>
+                <div className="glow-content">
+                  <p className="text-xs font-black uppercase tracking-widest text-blue-300/70 mb-2">Need Support?</p>
+                  <p className="text-xs text-white/50 mb-4 leading-relaxed">Confidential help is always available. Submit a support request and our team will respond within 24 hours.</p>
+                  <button onClick={() => navigate('/student/support')}
+                    className="w-full text-center text-xs font-bold py-2.5 px-4 rounded-xl transition-all"
+                    style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', color: '#60A5FA' }}>
+                    Request Support →
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

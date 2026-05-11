@@ -7,7 +7,7 @@
 :root {
   --font-body: 'Sora', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --bg-base: #0a0c1a;
+  --bg-base: #3a4d76;
   --glass-base: rgba(255, 255, 255, 0.07);
   --glass-elevated: rgba(255, 255, 255, 0.11);
   --border-base: rgba(255, 255, 255, 0.14);
@@ -21,8 +21,8 @@
   --text-secondary: rgba(220, 220, 255, 0.72);
   --text-tertiary: rgba(180, 180, 220, 0.50);
   --text-muted: rgba(150, 150, 200, 0.36);
-  --shadow-card: 0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2);
-  --shadow-elevated: 0 8px 40px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-card: 0 4px 24px rgba(87, 129, 135, 0.35), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-elevated: 0 8px 40px rgba(104, 171, 164, 0.45), 0 2px 8px rgba(0,0,0,0.3);
   --shadow-glow-violet: 0 0 30px rgba(139,120,255,0.2);
   --shadow-inner: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.15);
   --radius-md: 12px;
@@ -219,11 +219,6 @@ label.bg-white.text-indigo-900 { background: linear-gradient(135deg,#fff 0%,#e8e
 }
 
 /* ==============================================================
-   ██╗      ██████╗  █████╗ ██████╗ ██╗███╗   ██╗ ██████╗
-   ██║     ██╔═══██╗██╔══██╗██╔══██╗██║████╗  ██║██╔════╝
-   ██║     ██║   ██║███████║██║  ██║██║██╔██╗ ██║██║  ███╗
-   ██║     ██║   ██║██╔══██║██║  ██║██║██║╚██╗██║██║   ██║
-   ███████╗╚██████╔╝██║  ██║██████╔╝██║██║ ╚████║╚██████╔╝
    SCREEN STYLES
    ============================================================== */
 

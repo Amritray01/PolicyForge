@@ -9,11 +9,34 @@ import { useAuth } from '../context/AuthContext';
 import { wellnessAPI, studentAPI } from '../services/api';
 import { ArrowLeft, ArrowRight, CheckCircle, ChevronLeft, Brain, BookOpen, Home, Briefcase, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
+
+/* ── React Bits Inspired Aurora Background ── */
+const AuroraBackground = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[#050B14]">
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+    <motion.div 
+      animate={{ x: [0, 100, -50, 0], y: [0, -50, 100, 0], scale: [1, 1.2, 0.9, 1] }} 
+      transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+      className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full opacity-40 blur-[100px] mix-blend-screen bg-blue-600"
+    />
+    <motion.div 
+      animate={{ x: [0, -100, 50, 0], y: [0, 50, -100, 0], scale: [1, 1.5, 0.8, 1] }} 
+      transition={{ duration: 20, repeat: Infinity, ease: "linear", delay: 2 }}
+      className="absolute top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full opacity-30 blur-[120px] mix-blend-screen bg-cyan-500"
+    />
+    <motion.div 
+      animate={{ x: [0, 50, -50, 0], y: [0, 100, -50, 0], scale: [1, 0.8, 1.1, 1] }} 
+      transition={{ duration: 18, repeat: Infinity, ease: "linear", delay: 4 }}
+      className="absolute -bottom-[20%] left-[20%] w-[60%] h-[40%] rounded-full opacity-30 blur-[100px] mix-blend-screen bg-indigo-600"
+    />
+  </div>
+);
 
 // ── Section definitions ────────────────────────────────────────────────────
 const SECTIONS = [
   {
-    id: 'mental', label: 'Mental Wellness', icon: Brain, color: '#8b78ff',
+    id: 'mental', label: 'Mental Wellness', icon: Brain, color: '#3B82F6',
     description: 'How have you been feeling emotionally?',
     scale: '03',
     questions: [
@@ -25,7 +48,7 @@ const SECTIONS = [
     ],
   },
   {
-    id: 'academic', label: 'Academic Stress', icon: BookOpen, color: '#22d3ee',
+    id: 'academic', label: 'Academic Stress', icon: BookOpen, color: '#F97316',
     description: 'How is your academic workload affecting you?',
     scale: '03',
     questions: [
@@ -37,7 +60,7 @@ const SECTIONS = [
     ],
   },
   {
-    id: 'hostel', label: 'Hostel & Mess', icon: Home, color: '#34D399',
+    id: 'hostel', label: 'Hostel & Mess', icon: Home, color: '#EF4444',
     description: 'Rate your satisfaction with hostel facilities.',
     scale: 'likert',
     questions: [
@@ -199,10 +222,12 @@ const WellnessAssessment = () => {
   const globalQIndex = SECTIONS.slice(0, sectionIdx).reduce((s, sec) => s + sec.questions.length, 0) + questionIdx;
 
   return (
-    <div className="min-h-screen app-bg text-white pb-16">
+    <div className="relative min-h-screen text-white pb-16 overflow-hidden bg-[#050B14]">
+      <AuroraBackground />
+      <div className="relative z-10">
       {/* Nav */}
-      <nav className="glass sticky top-0 z-50 px-5 py-3 rounded-none border-b-0 shadow-xl">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
+      <nav className="glow-card sticky top-0 z-50 px-5 py-3 rounded-none border-t-0 border-x-0 rounded-b-3xl shadow-xl">
+        <div className="glow-content max-w-3xl mx-auto flex items-center justify-between">
           <button onClick={goBack} className="flex items-center gap-2 bg-white/6 hover:bg-white/12 px-3 py-1.5 rounded-xl transition border border-white/10 text-sm">
             <ChevronLeft size={16} /> {isReview ? 'Back' : sectionIdx === 0 && questionIdx === 0 ? 'Back' : 'Prev'}
           </button>
@@ -247,7 +272,8 @@ const WellnessAssessment = () => {
 
         {/* Question card */}
         {!isReview && currentQ && (
-          <div className="glass-strong p-8 mb-6 overflow-hidden">
+          <div className="glow-card p-8 mb-6">
+            <div className="glow-content">
             <div className="flex items-center gap-2 mb-4">
               {React.createElement(section.icon, { size: 16, style: { color: section.color } })}
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: section.color }}>{section.label}</span>
@@ -291,13 +317,15 @@ const WellnessAssessment = () => {
                 {sectionIdx === SECTIONS.length - 1 && questionIdx === section.questions.length - 1 ? 'Review' : 'Next'} <ArrowRight size={15} />
               </button>
             </div>
+            </div>
           </div>
         )}
 
         {/* Review page */}
         {isReview && (
           <div className="space-y-4">
-            <div className="glass-strong p-6">
+            <div className="glow-card p-6">
+              <div className="glow-content">
               <h2 className="text-lg font-black text-center mb-1">Assessment Complete</h2>
               <p className="text-xs text-white/40 text-center mb-6">Review your responses across all 5 wellness domains</p>
               <div className="flex flex-wrap justify-center gap-4">
@@ -310,12 +338,14 @@ const WellnessAssessment = () => {
                   return <ScoreRing key={sec.id} score={stress} color={sec.color} label={sec.label.split(' ')[0]} />;
                 })}
               </div>
+              </div>
             </div>
 
             {SECTIONS.map((sec) => {
               const opts = sec.scale === 'likert' ? LIKERT_OPTIONS : STRESS_OPTIONS;
               return (
-                <div key={sec.id} className="glass p-5">
+                <div key={sec.id} className="glow-card p-5">
+                  <div className="glow-content">
                   <div className="flex items-center gap-2 mb-3">
                     {React.createElement(sec.icon, { size: 14, style: { color: sec.color } })}
                     <h3 className="text-xs font-black uppercase tracking-widest" style={{ color: sec.color }}>{sec.label}</h3>
@@ -338,16 +368,19 @@ const WellnessAssessment = () => {
                       );
                     })}
                   </div>
+                  </div>
                 </div>
               );
             })}
 
-            <div className="glass p-5">
+            <div className="glow-card p-5">
+              <div className="glow-content">
               <label className="block text-xs font-black uppercase tracking-widest text-white/40 mb-3">Additional Notes <span className="text-white/20 font-normal normal-case tracking-normal">(optional)</span></label>
               <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
                 className="w-full resize-none rounded-xl text-sm"
                 placeholder="Anything else you'd like to share…"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.10)', padding: '12px 14px', color: 'rgba(255,255,255,0.85)', outline: 'none' }} />
+              </div>
             </div>
 
             <div className="flex gap-3">
@@ -356,12 +389,13 @@ const WellnessAssessment = () => {
               </button>
               <button type="button" onClick={handleSubmit} disabled={isLoading || !isAllAnswered()}
                 className="flex-1 py-3.5 rounded-2xl font-black text-sm tracking-wide flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] disabled:opacity-40"
-                style={{ background: 'linear-gradient(135deg, #ffffff 0%, #e8e4ff 100%)', color: '#2d1b8f', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}>
+                style={{ background: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 100%)', color: '#1e3a8a', boxShadow: '0 4px 20px rgba(0,0,0,0.25)' }}>
                 {isLoading ? <span className="inline-block w-5 h-5 rounded-full border-2 border-indigo-400 border-t-transparent animate-spin" /> : <><CheckCircle size={17} /> Submit Wellness Assessment</>}
               </button>
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
