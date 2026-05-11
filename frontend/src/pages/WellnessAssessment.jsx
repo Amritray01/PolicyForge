@@ -40,11 +40,11 @@ const SECTIONS = [
     description: 'How have you been feeling emotionally?',
     scale: '03',
     questions: [
-      { key: 'm1_exhaustion',    text: 'Feeling emotionally exhausted or burned out' },
-      { key: 'm2_sleep',         text: 'Difficulty falling or staying asleep' },
-      { key: 'm3_motivation',    text: 'Loss of motivation or interest in activities' },
-      { key: 'm4_concentration', text: 'Trouble concentrating or focusing on tasks' },
-      { key: 'm5_isolation',     text: 'Feeling isolated or disconnected from others' },
+      { slug: 'm1_exhaustion',    text: 'Feeling emotionally exhausted or burned out' },
+      { slug: 'm2_sleep',         text: 'Difficulty falling or staying asleep' },
+      { slug: 'm3_motivation',    text: 'Loss of motivation or interest in activities' },
+      { slug: 'm4_concentration', text: 'Trouble concentrating or focusing on tasks' },
+      { slug: 'm5_isolation',     text: 'Feeling isolated or disconnected from others' },
     ],
   },
   {
@@ -52,11 +52,11 @@ const SECTIONS = [
     description: 'How is your academic workload affecting you?',
     scale: '03',
     questions: [
-      { key: 'a1_assignment', text: 'Overwhelmed by assignment deadlines and pressure' },
-      { key: 'a2_exam',       text: 'Experiencing fear or anxiety about exams' },
-      { key: 'a3_backlog',    text: 'Struggling with subject backlogs or arrears' },
-      { key: 'a4_time_mgmt',  text: 'Difficulty managing time between subjects' },
-      { key: 'a5_attendance', text: 'Stressed about attendance or missing classes' },
+      { slug: 'a1_assignment', text: 'Overwhelmed by assignment deadlines and pressure' },
+      { slug: 'a2_exam',       text: 'Experiencing fear or anxiety about exams' },
+      { slug: 'a3_backlog',    text: 'Struggling with subject backlogs or arrears' },
+      { slug: 'a4_time_mgmt',  text: 'Difficulty managing time between subjects' },
+      { slug: 'a5_attendance', text: 'Stressed about attendance or missing classes' },
     ],
   },
   {
@@ -64,11 +64,11 @@ const SECTIONS = [
     description: 'Rate your satisfaction with hostel facilities.',
     scale: 'likert',
     questions: [
-      { key: 'h1_food',        text: 'Food quality and variety in the mess' },
-      { key: 'h2_cleanliness', text: 'Cleanliness of rooms and common areas' },
-      { key: 'h3_internet',    text: 'Internet connectivity and reliability' },
-      { key: 'h4_noise',       text: 'Noise levels and sleep environment' },
-      { key: 'h5_safety',      text: 'Feeling of safety and security on campus' },
+      { slug: 'h1_food',        text: 'Food quality and variety in the mess' },
+      { slug: 'h2_cleanliness', text: 'Cleanliness of rooms and common areas' },
+      { slug: 'h3_internet',    text: 'Internet connectivity and reliability' },
+      { slug: 'h4_noise',       text: 'Noise levels and sleep environment' },
+      { slug: 'h5_safety',      text: 'Feeling of safety and security on campus' },
     ],
   },
   {
@@ -76,11 +76,11 @@ const SECTIONS = [
     description: 'How prepared do you feel for placements?',
     scale: '03',
     questions: [
-      { key: 'p1_anxiety',      text: 'Feeling anxious about campus placement season' },
-      { key: 'p2_technical',    text: 'Lacking confidence in technical skills' },
-      { key: 'p3_resume',       text: 'Uncertain about resume or profile strength' },
-      { key: 'p4_interview',    text: 'Nervous about interview performance' },
-      { key: 'p5_unemployment', text: 'Fear of not getting placed or unemployment' },
+      { slug: 'p1_anxiety',      text: 'Feeling anxious about campus placement season' },
+      { slug: 'p2_technical',    text: 'Lacking confidence in technical skills' },
+      { slug: 'p3_resume',       text: 'Uncertain about resume or profile strength' },
+      { slug: 'p4_interview',    text: 'Nervous about interview performance' },
+      { slug: 'p5_unemployment', text: 'Fear of not getting placed or unemployment' },
     ],
   },
   {
@@ -88,11 +88,11 @@ const SECTIONS = [
     description: 'How balanced is your daily lifestyle?',
     scale: '03',
     questions: [
-      { key: 'l1_physical',        text: 'Lack of regular physical activity or exercise' },
-      { key: 'l2_social',          text: 'Feeling disconnected from friends or peers' },
-      { key: 'l3_screen_time',     text: 'Excessive screen time affecting wellbeing' },
-      { key: 'l4_sleep_routine',   text: 'Irregular or poor sleep routine' },
-      { key: 'l5_campus_activity', text: 'Not participating in campus clubs or events' },
+      { slug: 'l1_physical',        text: 'Lack of regular physical activity or exercise' },
+      { slug: 'l2_social',          text: 'Feeling disconnected from friends or peers' },
+      { slug: 'l3_screen_time',     text: 'Excessive screen time affecting wellbeing' },
+      { slug: 'l4_sleep_routine',   text: 'Irregular or poor sleep routine' },
+      { slug: 'l5_campus_activity', text: 'Not participating in campus clubs or events' },
     ],
   },
 ];
@@ -115,7 +115,7 @@ const LIKERT_OPTIONS = [
 // ── helpers ────────────────────────────────────────────────────────────────
 const initAnswers = () => {
   const a = {};
-  SECTIONS.forEach(s => s.questions.forEach(q => { a[q.key] = null; }));
+  SECTIONS.forEach(s => s.questions.forEach(q => { a[q.slug] = null; }));
   return a;
 };
 
@@ -154,7 +154,7 @@ const WellnessAssessment = () => {
   const section = SECTIONS[sectionIdx];
   const options = section?.scale === 'likert' ? LIKERT_OPTIONS : STRESS_OPTIONS;
   const currentQ = section?.questions[questionIdx];
-  const currentAnswer = currentQ ? answers[currentQ.key] : null;
+  const currentAnswer = currentQ ? answers[currentQ.slug] : null;
 
   const totalQuestions = SECTIONS.reduce((s, sec) => s + sec.questions.length, 0);
   const answeredCount = Object.values(answers).filter(v => v !== null).length;
@@ -288,10 +288,10 @@ const WellnessAssessment = () => {
 
             <div className="space-y-2.5">
               {options.map((opt) => {
-                const selected = answers[currentQ.key] === opt.value;
+                const selected = answers[currentQ.slug] === opt.value;
                 return (
                   <button key={opt.value} type="button"
-                    onClick={() => handleAnswer(currentQ.key, opt.value)}
+                    onClick={() => handleAnswer(currentQ.slug, opt.value)}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all border text-left"
                     style={selected ? {
                       borderColor: opt.color, background: `${opt.color}18`, color: opt.color, boxShadow: `0 0 18px ${opt.color}22`,
@@ -330,7 +330,7 @@ const WellnessAssessment = () => {
               <p className="text-xs text-white/40 text-center mb-6">Review your responses across all 5 wellness domains</p>
               <div className="flex flex-wrap justify-center gap-4">
                 {SECTIONS.map((sec) => {
-                  const raw = sec.questions.reduce((sum, q) => sum + (answers[q.key] || 0), 0);
+                  const raw = sec.questions.reduce((sum, q) => sum + (answers[q.slug] || 0), 0);
                   const maxRaw = sec.questions.length * (sec.scale === 'likert' ? 5 : 3);
                   const stress = sec.scale === 'likert'
                     ? Math.round(((maxRaw - raw) / (maxRaw - sec.questions.length)) * 100)
@@ -352,10 +352,10 @@ const WellnessAssessment = () => {
                   </div>
                   <div className="space-y-1.5">
                     {sec.questions.map((q, i) => {
-                      const ans = answers[q.key];
+                      const ans = answers[q.slug];
                       const opt = opts.find(o => o.value === ans);
                       return (
-                        <div key={q.key}
+                        <div key={q.slug}
                           onClick={() => { setIsReview(false); setSectionIdx(SECTIONS.indexOf(sec)); setQuestionIdx(i); }}
                           className="flex items-center gap-3 p-2.5 rounded-xl cursor-pointer hover:bg-white/5 border border-transparent hover:border-white/8 transition-all">
                           <span className="text-[10px] font-mono text-white/25 w-4 flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>

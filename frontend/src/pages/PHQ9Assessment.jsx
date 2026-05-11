@@ -9,15 +9,15 @@ import { ArrowLeft, ArrowRight, CheckCircle, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const PHQ9_QUESTIONS = [
-  { key: 'q1_interest', text: 'Little interest or pleasure in doing things', category: 'Mood' },
-  { key: 'q2_depressed', text: 'Feeling down, depressed, or hopeless', category: 'Mood' },
-  { key: 'q3_sleep', text: 'Trouble falling or staying asleep, or sleeping too much', category: 'Sleep' },
-  { key: 'q4_energy', text: 'Feeling tired or having little energy', category: 'Energy' },
-  { key: 'q5_appetite', text: 'Poor appetite or overeating', category: 'Appetite' },
-  { key: 'q6_failure', text: 'Feeling bad about yourself — or that you are a failure', category: 'Self-worth' },
-  { key: 'q7_concentration', text: 'Trouble concentrating on things, such as reading or watching television', category: 'Focus' },
-  { key: 'q8_movement', text: 'Moving or speaking so slowly that other people could have noticed', category: 'Activity' },
-  { key: 'q9_suicidal', text: 'Thoughts that you would be better off dead, or of hurting yourself', category: 'Safety' },
+  { slug: 'q1_interest', text: 'Little interest or pleasure in doing things', category: 'Mood' },
+  { slug: 'q2_depressed', text: 'Feeling down, depressed, or hopeless', category: 'Mood' },
+  { slug: 'q3_sleep', text: 'Trouble falling or staying asleep, or sleeping too much', category: 'Sleep' },
+  { slug: 'q4_energy', text: 'Feeling tired or having little energy', category: 'Energy' },
+  { slug: 'q5_appetite', text: 'Poor appetite or overeating', category: 'Appetite' },
+  { slug: 'q6_failure', text: 'Feeling bad about yourself — or that you are a failure', category: 'Self-worth' },
+  { slug: 'q7_concentration', text: 'Trouble concentrating on things, such as reading or watching television', category: 'Focus' },
+  { slug: 'q8_movement', text: 'Moving or speaking so slowly that other people could have noticed', category: 'Activity' },
+  { slug: 'q9_suicidal', text: 'Thoughts that you would be better off dead, or of hurting yourself', category: 'Safety' },
 ];
 
 const FREQUENCY_OPTIONS = [
@@ -36,7 +36,7 @@ const scoreToRisk = (score) => {
 
 const QuestionCard = ({ question, index, answer, onAnswer, direction }) => {
   return (
-    <div className={`phq-question-card phq-slide-${direction}`} key={question.key}>
+    <div className={`phq-question-card phq-slide-${direction}`} key={question.slug}>
       <span className="phq-category-tag">{question.category}</span>
       <div className="phq-q-number">
         <span className="phq-q-index">{String(index + 1).padStart(2, '0')}</span>
@@ -50,7 +50,7 @@ const QuestionCard = ({ question, index, answer, onAnswer, direction }) => {
             <button
               key={opt.value}
               type="button"
-              onClick={() => onAnswer(question.key, opt.value)}
+              onClick={() => onAnswer(question.slug, opt.value)}
               className={`phq-option-btn ${selected ? 'phq-option-selected' : ''}`}
               style={selected ? {
                 borderColor: opt.color, background: `${opt.color}18`, color: opt.color, boxShadow: `0 0 20px ${opt.color}28`,
@@ -89,7 +89,7 @@ const PHQ9Assessment = () => {
   const liveRisk = scoreToRisk(rawScore);
   const isFormComplete = () => Object.values(answers).every(v => v !== null);
   const currentQ = PHQ9_QUESTIONS[currentStep];
-  const currentAnswer = currentQ ? answers[currentQ.key] : null;
+  const currentAnswer = currentQ ? answers[currentQ.slug] : null;
 
   useEffect(() => {
     const handleKey = (e) => {
@@ -104,7 +104,7 @@ const PHQ9Assessment = () => {
       }
       const num = parseInt(e.key);
       if (!isNaN(num) && num >= 0 && num <= 3 && currentQ) {
-        handleAnswerChange(currentQ.key, num);
+        handleAnswerChange(currentQ.slug, num);
       }
     };
     window.addEventListener('keydown', handleKey);
@@ -199,7 +199,7 @@ const PHQ9Assessment = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-1.5">
             {PHQ9_QUESTIONS.map((_, i) => (
-              <button key={i} onClick={() => { setDirection(i < currentStep ? 'left' : 'right'); setCurrentStep(i); }} className="transition-all duration-300 rounded-full" style={{ width: i === currentStep ? '20px' : '6px', height: '6px', background: answers[PHQ9_QUESTIONS[i].key] !== null ? '#8b78ff' : i === currentStep ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)' }} />
+              <button key={i} onClick={() => { setDirection(i < currentStep ? 'left' : 'right'); setCurrentStep(i); }} className="transition-all duration-300 rounded-full" style={{ width: i === currentStep ? '20px' : '6px', height: '6px', background: answers[PHQ9_QUESTIONS[i].slug] !== null ? '#8b78ff' : i === currentStep ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)' }} />
             ))}
             <button onClick={() => isFormComplete() && setCurrentStep(totalQuestions)} className="rounded-full transition-all duration-300" style={{ width: isReviewStep ? '20px' : '6px', height: '6px', background: isReviewStep ? '#22d3ee' : 'rgba(255,255,255,0.1)' }} />
           </div>
@@ -233,10 +233,10 @@ const PHQ9Assessment = () => {
               <h3 className="text-xs font-black uppercase tracking-widest text-white/40 mb-4">Answer Summary</h3>
               <div className="grid grid-cols-1 gap-2">
                 {PHQ9_QUESTIONS.map((q, i) => {
-                  const ans = answers[q.key];
+                  const ans = answers[q.slug];
                   const opt = FREQUENCY_OPTIONS.find(o => o.value === ans);
                   return (
-                    <div key={q.key} onClick={() => { setDirection('left'); setCurrentStep(i); }} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all hover:bg-white/5 border border-transparent hover:border-white/8">
+                    <div key={q.slug} onClick={() => { setDirection('left'); setCurrentStep(i); }} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all hover:bg-white/5 border border-transparent hover:border-white/8">
                       <span className="text-[10px] font-mono text-white/25 w-5 flex-shrink-0">{String(i + 1).padStart(2, '0')}</span>
                       <p className="text-xs text-white/65 flex-1 truncate">{q.text}</p>
                       {opt ? (

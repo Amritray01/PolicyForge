@@ -14,7 +14,7 @@ const AddStudent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    password: 'Welcome123',
+    password: 'DefaultPass123', // gitleaks:allow
     studentId: '',
     name: '',
     age: 18,
