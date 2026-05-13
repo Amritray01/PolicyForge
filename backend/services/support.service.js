@@ -84,7 +84,7 @@ const updateTicket = async (ticketId, { status, priority, adminNotes }) => {
  */
 const getPendingCount = async () => {
   return await prisma.supportTicket.count({
-    where: { status: { in: ['OPEN', 'ESCALATED'] } },
+    where: { status: { in: ['OPEN', 'IN_PROGRESS', 'ESCALATED'] } },
   });
 };
 

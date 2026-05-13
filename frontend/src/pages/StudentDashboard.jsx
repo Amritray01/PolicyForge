@@ -23,7 +23,7 @@ const RiskRing = ({ score, color }) => {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-5xl font-black leading-none" style={{ color, letterSpacing: '-0.05em', textShadow: `0 0 30px ${color}` }}>{score}</span>
-        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mt-1">/ 3</span>
+        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mt-1">/ 100</span>
       </div>
     </div>
   );
@@ -46,11 +46,13 @@ const HistoryItem = ({ assessment, index, total, getRiskColor, getRiskLabel }) =
     return () => obs.disconnect();
   }, []);
 
+  const score = assessment.finalWellnessScore ?? assessment.riskScore ?? 0;
+
   return (
     <div ref={ref} className={`history-item ${visible ? 'history-item-visible' : ''}`} style={{ transitionDelay: `${index * 50}ms` }}>
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm flex-shrink-0" style={{ background: `${getRiskColor(assessment.riskScore)}22`, border: `1px solid ${getRiskColor(assessment.riskScore)}44`, color: getRiskColor(assessment.riskScore) }}>
-          {assessment.riskScore}
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm flex-shrink-0" style={{ background: `${getRiskColor(score)}22`, border: `1px solid ${getRiskColor(score)}44`, color: getRiskColor(score) }}>
+          {score}
         </div>
         <div>
           <p className="text-sm font-semibold text-white/90">Check-in #{total - index}</p>
@@ -59,8 +61,8 @@ const HistoryItem = ({ assessment, index, total, getRiskColor, getRiskLabel }) =
           </p>
         </div>
       </div>
-      <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg" style={{ color: getRiskColor(assessment.riskScore), background: `${getRiskColor(assessment.riskScore)}18`, border: `1px solid ${getRiskColor(assessment.riskScore)}40` }}>
-        {getRiskLabel(assessment.riskScore)}
+      <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg" style={{ color: getRiskColor(score), background: `${getRiskColor(score)}18`, border: `1px solid ${getRiskColor(score)}40` }}>
+        {getRiskLabel(score)}
       </span>
     </div>
   );
@@ -97,14 +99,27 @@ const StudentDashboard = () => {
     }
   };
 
-  const getRiskColor = (score) => ({ 0: '#10B981', 1: '#FBBF24', 2: '#F97316', 3: '#EF4444' }[score] || '#6B7280');
-  const getRiskLabel = (score) => ({ 0: 'Minimal Depression', 1: 'Mild Depression', 2: 'Moderate Depression', 3: 'Severe' }[score] || 'Unknown');
-  const getMotivationalMessage = (score) => ({
-    0: "You're doing great! Keep maintaining your healthy habits.",
-    1: "Stay connected with friends. Consider stress management techniques.",
-    2: "Please consider speaking with a counselor. Support is available.",
-    3: "🚨 Immediate support recommended. Please contact counseling today.",
-  }[score] || "Take care of your mental health.");
+  const getRiskColor = (score) => {
+    if (score <= 20) return '#10B981';
+    if (score <= 40) return '#51b18e';
+    if (score <= 60) return '#FBBF24';
+    if (score <= 80) return '#F97316';
+    return '#EF4444';
+  };
+  const getRiskLabel = (score) => {
+    if (score <= 20) return 'Excellent';
+    if (score <= 40) return 'Stable';
+    if (score <= 60) return 'Initial Risk';
+    if (score <= 80) return 'High Risk';
+    return 'Critical';
+  };
+  const getMotivationalMessage = (score) => {
+    if (score <= 20) return "You're doing great! Keep maintaining your healthy habits.";
+    if (score <= 40) return "Stay connected with friends. Consider stress management techniques.";
+    if (score <= 60) return "Please consider speaking with a counselor. Support is available.";
+    if (score <= 80) return "🚨 Support recommended. Please contact counseling.";
+    return "🚨 Immediate support recommended. Please contact counseling today.";
+  };
 
   if (loading || !student) {
     return (
@@ -207,13 +222,22 @@ const StudentDashboard = () => {
             <div className="glass p-5">
               <h3 className="text-xs font-black uppercase tracking-widest text-white/50 mb-4">Risk Guide</h3>
               <div className="space-y-2">
-                {[{ score: 0, label: 'Minimal', color: '#10B981' }, { score: 1, label: 'Mild', color: '#FBBF24' }, { score: 2, label: 'Moderate', color: '#F97316' }, { score: 3, label: 'Severe', color: '#EF4444' }].map(({ score, label, color }) => (
-                  <div key={score} className="flex items-center gap-3 p-2.5 rounded-xl transition-all" style={{ background: riskScore === score ? `${color}12` : 'rgba(255,255,255,0.03)', border: `1px solid ${riskScore === score ? color + '35' : 'rgba(255,255,255,0.06)'}` }}>
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-black text-xs flex-shrink-0" style={{ background: `${color}22`, color }}>{score}</div>
-                    <p className="text-xs font-semibold text-white/75">{label}</p>
-                    {riskScore === score && <span className="ml-auto text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color, background: `${color}20` }}>You</span>}
-                  </div>
-                ))}
+                {[
+                  { range: '0-20', label: 'Excellent', color: '#10B981', max: 20 },
+                  { range: '21-40', label: 'Stable', color: '#51b18e', max: 40 },
+                  { range: '41-60', label: 'Initial Risk', color: '#FBBF24', max: 60 },
+                  { range: '61-80', label: 'High Risk', color: '#F97316', max: 80 },
+                  { range: '81-100', label: 'Critical', color: '#EF4444', max: 100 }
+                ].map(({ range, label, color, max }) => {
+                  const isCurrent = (max === 20 ? riskScore <= 20 : (riskScore <= max && riskScore > max - 20));
+                  return (
+                    <div key={range} className="flex items-center gap-3 p-2.5 rounded-xl transition-all" style={{ background: isCurrent ? `${color}12` : 'rgba(255,255,255,0.03)', border: `1px solid ${isCurrent ? color + '35' : 'rgba(255,255,255,0.06)'}` }}>
+                      <div className="w-12 h-7 rounded-lg flex items-center justify-center text-white font-black text-[10px] flex-shrink-0" style={{ background: `${color}22`, color }}>{range}</div>
+                      <p className="text-xs font-semibold text-white/75">{label}</p>
+                      {isCurrent && <span className="ml-auto text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ color, background: `${color}20` }}>You</span>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div className="glass p-5" style={{ border: '1px solid rgba(139,120,255,0.2)', background: 'rgba(139,120,255,0.06)' }}>

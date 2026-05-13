@@ -145,8 +145,8 @@ const AdminDashboard = () => {
   const getWellnessLabel = (score) => {
     if (score <= 20) return 'Excellent';
     if (score <= 40) return 'Stable';
-    if (score <= 60) return 'Concern';
-    if (score <= 80) return 'High Stress';
+    if (score <= 60) return 'Initial Risk';
+    if (score <= 80) return 'High Risk';
     return 'Critical';
   };
 
@@ -168,8 +168,8 @@ const AdminDashboard = () => {
 
   const wellnessPieData = React.useMemo(() => {
     if (!students?.length) return [];
-    const bands = { Excellent: 0, Stable: 0, Concern: 0, 'High Stress': 0, Critical: 0 };
-    const colors = { Excellent: '#10B981', Stable: '#34D399', Concern: '#FBBF24', 'High Stress': '#F97316', Critical: '#EF4444' };
+    const bands = { Excellent: 0, Stable: 0, 'Initial Risk': 0, 'High Risk': 0, Critical: 0 };
+    const colors = { Excellent: '#10B981', Stable: '#34D399', 'Initial Risk': '#FBBF24', 'High Risk': '#F97316', Critical: '#EF4444' };
     students.forEach(s => { const lbl = getWellnessLabel(s.currentWellnessScore || 0); bands[lbl]++; });
     return Object.entries(bands).filter(([, v]) => v > 0).map(([name, value]) => ({ name, value, color: colors[name] }));
   }, [students]);
@@ -185,7 +185,29 @@ const AdminDashboard = () => {
     ];
   }, [domainAverages]);
 
-  const openTickets = tickets.filter(t => t.status === 'OPEN' || t.status === 'ESCALATED').length;
+  const processedTickets = React.useMemo(() => {
+    const normalTickets = [];
+    const anonymousGroups = {}; // grouped by type + status
+
+    tickets.forEach(t => {
+      if (t.isAnonymous) {
+        const key = `${t.type}_${t.status}`;
+        if (!anonymousGroups[key]) {
+          anonymousGroups[key] = { ...t, isGrouped: true, count: 1, messages: [t.message], ids: [t.id] };
+        } else {
+          anonymousGroups[key].count++;
+          anonymousGroups[key].messages.push(t.message);
+          anonymousGroups[key].ids.push(t.id);
+        }
+      } else {
+        normalTickets.push(t);
+      }
+    });
+
+    return [...Object.values(anonymousGroups), ...normalTickets].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [tickets]);
+
+  const openTickets = tickets.filter(t => t.status !== 'RESOLVED').length;
 
   if (loading) {
     return (
@@ -314,8 +336,8 @@ const AdminDashboard = () => {
               </div>
               <select value={filterRisk} onChange={(e) => setFilterRisk(e.target.value)} className="px-4 py-2.5 text-sm bg-white/8 border border-white/12 rounded-xl text-white outline-none cursor-pointer">
                 <option value="all">All Wellness Levels</option>
-                <option value="critical">🔴 High Stress / Critical</option>
-                <option value="concern">🟡 Moderate Concern</option>
+                <option value="critical">🔴 High Risk / Critical</option>
+                <option value="concern">🟡 Initial Risk</option>
                 <option value="stable">🟢 Stable / Excellent</option>
               </select>
               <div className="text-xs text-white/30 self-center font-mono px-2">{filteredStudents.length} records</div>
@@ -377,10 +399,10 @@ const AdminDashboard = () => {
               <h2 className="text-sm font-black uppercase tracking-widest text-white/60">Support Requests</h2>
               <span className="text-xs font-mono text-white/30">{tickets.length} total · {openTickets} open</span>
             </div>
-            {tickets.length > 0 ? (
+            {processedTickets.length > 0 ? (
               <div className="space-y-3">
-                {tickets.map((ticket) => (
-                  <div key={ticket.id} className="p-4 rounded-xl border border-white/8 bg-white/3 hover:bg-white/5 transition-all">
+                {processedTickets.map((ticket) => (
+                  <div key={ticket.id || ticket.ids[0]} className="p-4 rounded-xl border border-white/8 bg-white/3 hover:bg-white/5 transition-all">
                     <div className="flex items-start gap-3">
                       <div className="flex flex-col gap-1 flex-shrink-0">
                         <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md" style={{ background: `${PRIORITY_COLORS[ticket.priority]}20`, color: PRIORITY_COLORS[ticket.priority], border: `1px solid ${PRIORITY_COLORS[ticket.priority]}30` }}>
@@ -396,28 +418,46 @@ const AdminDashboard = () => {
                           {!ticket.isAnonymous && ticket.student && (
                             <span className="text-[10px] text-white/40">· {ticket.student.name} ({ticket.student.studentId})</span>
                           )}
-                          {ticket.isAnonymous && <span className="text-[10px] text-white/30 italic">Anonymous</span>}
+                          {ticket.isAnonymous && !ticket.isGrouped && <span className="text-[10px] text-white/30 italic">Anonymous</span>}
+                          {ticket.isGrouped && <span className="text-[10px] text-white/30 italic">Anonymous ({ticket.count} records)</span>}
                           <span className="ml-auto text-[9px] font-mono text-white/25">{new Date(ticket.createdAt).toLocaleDateString()}</span>
                         </div>
-                        <p className="text-sm text-white/60 leading-relaxed">{ticket.message}</p>
+                        {ticket.isGrouped ? (
+                          <div className="space-y-2 mt-2">
+                            {ticket.messages.map((m, i) => (
+                              <p key={i} className="text-sm text-white/60 leading-relaxed border-l-2 border-white/10 pl-2">{m}</p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-white/60 leading-relaxed">{ticket.message}</p>
+                        )}
                       </div>
                     </div>
                     {ticket.status !== 'RESOLVED' && (
                       <div className="flex gap-2 mt-3 pt-3 border-t border-white/6">
                         {ticket.status === 'OPEN' && (
-                          <button onClick={() => handleUpdateTicket(ticket.id, 'IN_PROGRESS')}
+                          <button onClick={() => {
+                            if (ticket.isGrouped) ticket.ids.forEach(id => handleUpdateTicket(id, 'IN_PROGRESS'));
+                            else handleUpdateTicket(ticket.id, 'IN_PROGRESS');
+                          }}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                             style={{ background: 'rgba(34,211,238,0.12)', border: '1px solid rgba(34,211,238,0.25)', color: '#22d3ee' }}>
                             <Clock size={11} /> In Progress
                           </button>
                         )}
-                        <button onClick={() => handleUpdateTicket(ticket.id, 'RESOLVED')}
+                        <button onClick={() => {
+                          if (ticket.isGrouped) ticket.ids.forEach(id => handleUpdateTicket(id, 'RESOLVED'));
+                          else handleUpdateTicket(ticket.id, 'RESOLVED');
+                        }}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                           style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)', color: '#10B981' }}>
                           <CheckCircle size={11} /> Resolve
                         </button>
                         {ticket.status !== 'ESCALATED' && (
-                          <button onClick={() => handleUpdateTicket(ticket.id, 'ESCALATED')}
+                          <button onClick={() => {
+                            if (ticket.isGrouped) ticket.ids.forEach(id => handleUpdateTicket(id, 'ESCALATED'));
+                            else handleUpdateTicket(ticket.id, 'ESCALATED');
+                          }}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                             style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', color: '#EF4444' }}>
                             <Zap size={11} /> Escalate

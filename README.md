@@ -41,35 +41,39 @@ The PolicyForge architecture is designed for high availability and low latency, 
 
 ```plantuml
 @startuml
-!theme plain
+top to bottom direction
 skinparam monochrome true
-skinparam packageStyle rectangle
 skinparam shadowing false
+skinparam roundcorner 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam defaultFontSize 13
+skinparam nodesep 18
+skinparam ranksep 28
+skinparam dpi 120
+hide stereotype
 
-title PolicyForge System Architecture
+title PolicyForge - System Architecture
 
-package "Frontend Layer (Vercel)" {
-    [Stable UI (Main)] as MainUI
-    [Canary UI (v2)] as CanaryUI
-    [Browser Cache API] as CacheAPI
-}
+rectangle "Users\n(Admin / Student)" as Users
+rectangle "Frontend\nVercel" as Frontend
+rectangle "Nginx\nProxy" as Nginx
+rectangle "Backend API\nRender" as Backend
+rectangle "Auth\nJWT + Bcrypt" as Auth
+rectangle "Logic\nControllers + Services" as Logic
+rectangle "Prisma ORM" as Prisma
+database "PostgreSQL\nDatabase" as DB
+rectangle "Monitoring\nPrometheus + Grafana" as Monitor
 
-package "API Layer (Render)" {
-    [Clustered Express Server] as Express
-    [Response Compression (Brotli)] as Compression
-    [Server-Side Cache (apicache)] as ServerCache
-}
-
-database "Data Layer (PostgreSQL)" {
-    [Neon Database] as DB
-}
-
-MainUI --> Express : API Calls
-CanaryUI --> Express : API Calls
-Express --> ServerCache : Cache Check
-ServerCache --> DB : Prisma ORM
-Express --> Compression : Gzip/Brotli
-MainUI <--> CacheAPI : Stale-While-Revalidate
+Users --> Frontend
+Frontend --> Nginx
+Nginx --> Backend
+Backend --> Auth
+Auth --> Logic
+Logic --> Prisma
+Prisma --> DB
+Frontend --> Monitor
+Backend --> Monitor
 @enduml
 ```
 
