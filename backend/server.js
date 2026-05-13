@@ -7,6 +7,10 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const compression = require('compression');
+const apicache = require('apicache');
+const cluster = require('cluster');
+const os = require('os');
 const { PrismaClient } = require('@prisma/client');
 console.log("DB URL:", process.env.DATABASE_URL);
 // Init Prisma
@@ -30,6 +34,14 @@ const app = express();
 // MIDDLEWARE
 // =========================
 app.use(helmet());
+app.use(compression());
+
+// Keep-Alive connection header middleware
+app.use((req, res, next) => {
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Keep-Alive', 'timeout=5, max=100');
+  next();
+});
 
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
@@ -46,9 +58,13 @@ if (process.env.NODE_ENV !== 'production') {
 // =========================
 // ROUTES
 // =========================
+const cacheMiddleware = process.env.NODE_ENV === 'test' 
+  ? (req, res, next) => next() 
+  : apicache.middleware('30 seconds');
+
 app.use('/api/auth', authRoutes);
-app.use('/api/students', studentRoutes);
-app.use('/api/assessments', assessmentRoutes);
+app.use('/api/students', cacheMiddleware, studentRoutes);
+app.use('/api/assessments', cacheMiddleware, assessmentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/wellness', wellnessRoutes);
 app.use('/api/support', supportRoutes);
@@ -111,7 +127,7 @@ async function startServer() {
     console.log('✅ PostgreSQL connected via Prisma');
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🚀 Server running on port ${PORT} (Worker ${process.pid})`);
     });
 
   } catch (error) {
@@ -120,7 +136,27 @@ async function startServer() {
   }
 }
 
-startServer();
+// Fixed 1 worker or 80% CPU logic (safe for free tier)
+if (process.env.NODE_ENV !== 'test') {
+  if (cluster.isMaster) {
+    const WORKER_COUNT = Math.max(1, Math.floor(os.cpus().length * 0.8));
+    console.log(`Master ${process.pid} is running. Forking ${WORKER_COUNT} workers...`);
+    
+    // For free tiers like Render, default to 1 if no env var
+    const workersToFork = process.env.WORKER_COUNT || 1;
+    
+    for (let i = 0; i < workersToFork; i++) {
+      cluster.fork();
+    }
+
+    cluster.on('exit', (worker, code, signal) => {
+      console.log(`Worker ${worker.process.pid} died. Forking a new one...`);
+      cluster.fork();
+    });
+  } else {
+    startServer();
+  }
+}
 
 // =========================
 // GRACEFUL SHUTDOWN
@@ -141,4 +177,7 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled Promise Rejection:', err);
 });
 
-module.exports = app;
+module.exports = {
+  app,
+  prisma
+};

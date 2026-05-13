@@ -12,4 +12,8 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    brotliSize: true,
+    cssCodeSplit: true,
+  },
 });

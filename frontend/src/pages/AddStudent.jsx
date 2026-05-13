@@ -3,7 +3,7 @@
  * Migrated for Prisma & Glassmorphism
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { studentAPI } from '../services/api';
 import { ArrowLeft, UserPlus } from 'lucide-react';
@@ -23,16 +23,16 @@ const AddStudent = () => {
     cgpa: 0,
   });
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     // ✅ CRITICAL: Postgres is strictly typed. Convert age and cgpa to numbers.
     setFormData((prev) => ({
       ...prev,
       [name]: name === 'age' || name === 'cgpa' ? parseFloat(value) : value,
     }));
-  };
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -47,7 +47,11 @@ const AddStudent = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [formData, navigate]);
+
+  const isFormValid = useMemo(() => {
+    return formData.email && formData.studentId && formData.name && formData.course;
+  }, [formData]);
 
   return (
     <div className="min-h-screen app-bg text-white pb-12">
@@ -202,15 +206,14 @@ const AddStudent = () => {
               </button>
               <button
                 type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-white text-indigo-700 py-3 rounded-xl font-bold hover:bg-indigo-50 transition transform active:scale-[0.98] shadow-lg flex items-center justify-center gap-2"
+                disabled={isLoading || !isFormValid}
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold tracking-wide transition shadow-lg text-indigo-900 bg-white hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
               >
                 {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-700"></div>
+                  <div className="w-5 h-5 border-2 border-indigo-900/30 border-t-indigo-900 rounded-full animate-spin" />
                 ) : (
                   <>
-                    <UserPlus size={20} />
-                    Enroll Student
+                    <UserPlus size={18} /> Complete Enrollment
                   </>
                 )}
               </button>

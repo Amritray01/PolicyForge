@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, LogIn, Eye, EyeOff, ShieldCheck, Zap } from 'lucide-react';
-import { useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ── React Bits Inspired Aurora Background ── */
@@ -110,30 +109,25 @@ const InteractiveLogin = () => {
     'Mental health, tracked with care.',
   ]);
 
-  // TanStack Query Mutation replacing previous raw state
-  const loginMutation = useMutation({
-    mutationFn: async ({ email, password }) => {
-      // Wrapper to hook into tanstack logic while preserving AuthContext's state mgmt
-      const result = await login(email, password);
-      if (!result.success) throw new Error(result.error || 'Invalid credentials.');
-      return result;
-    },
-    onSuccess: (data) => {
-      if (data.user.role === 'ADMIN') {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorBanner('');
+    setIsLoading(true);
+    
+    const result = await login(email, password);
+    setIsLoading(false);
+    
+    if (!result.success) {
+      setErrorBanner(result.error || 'Invalid credentials.');
+    } else {
+      if (result.user.role === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/student');
       }
-    },
-    onError: (err) => {
-      setErrorBanner(err.message);
     }
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setErrorBanner('');
-    loginMutation.mutate({ email, password });
   };
 
   const fillDemoCredentials = (role) => {
@@ -248,20 +242,20 @@ const InteractiveLogin = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={loginMutation.isPending || !email || !password}
-                className="w-full py-4 mt-2 bg-gradient-to-r from-indigo-500 to-pink-500 hover:from-indigo-600 hover:to-pink-600 text-white rounded-xl font-bold tracking-wide shadow-lg Disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden transition-all"
+                disabled={!email || !password || isLoading}
+                className={`w-full py-4 rounded-xl font-bold text-lg tracking-wide shadow-lg transition-all duration-300 flex items-center justify-center gap-3 ${
+                  !email || !password || isLoading 
+                    ? 'bg-white/10 text-white/40 cursor-not-allowed border border-white/5' 
+                    : 'bg-white text-indigo-900 hover:bg-indigo-50 hover:shadow-indigo-500/25'
+                }`}
               >
-                {loginMutation.isPending ? (
-                  <motion.div 
-                    animate={{ rotate: 360 }} 
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                    className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full mx-auto"
-                  />
+                {isLoading ? (
+                  <div className="w-6 h-6 border-2 border-indigo-900/30 border-t-indigo-900 rounded-full animate-spin" />
                 ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <LogIn size={20} className="group-hover:translate-x-1 transition-transform" />
-                    Connect securely
-                  </span>
+                  <>
+                    <LogIn size={20} className={!email || !password ? 'opacity-40' : ''} />
+                    Sign In Securely
+                  </>
                 )}
               </motion.button>
             </form>

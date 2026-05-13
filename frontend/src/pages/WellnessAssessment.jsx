@@ -3,7 +3,7 @@
  * Multi-domain Campus Wellness Self-Assessment
  * Sections: Mental · Academic · Hostel · Placement · Lifestyle
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { wellnessAPI, studentAPI } from '../services/api';
@@ -156,11 +156,11 @@ const WellnessAssessment = () => {
   const currentQ = section?.questions[questionIdx];
   const currentAnswer = currentQ ? answers[currentQ.slug] : null;
 
-  const totalQuestions = SECTIONS.reduce((s, sec) => s + sec.questions.length, 0);
+  const totalQuestions = useMemo(() => SECTIONS.reduce((s, sec) => s + sec.questions.length, 0), []);
   const answeredCount = Object.values(answers).filter(v => v !== null).length;
-  const progress = (answeredCount / totalQuestions) * 100;
+  const progress = useMemo(() => (answeredCount / totalQuestions) * 100, [answeredCount, totalQuestions]);
 
-  const isAllAnswered = () => Object.values(answers).every(v => v !== null);
+  const isAllAnswered = useCallback(() => Object.values(answers).every(v => v !== null), [answers]);
 
   // Keyboard nav
   useEffect(() => {
@@ -173,33 +173,27 @@ const WellnessAssessment = () => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [currentAnswer, sectionIdx, questionIdx]);
 
-  const handleAnswer = (key, value) => {
-    setAnswers(prev => ({ ...prev, [key]: value }));
-    setTimeout(() => {
-      if (questionIdx < section.questions.length - 1) {
-        setDirection('right'); setQuestionIdx(q => q + 1);
-      } else if (sectionIdx < SECTIONS.length - 1) {
-        setDirection('right'); setSectionIdx(s => s + 1); setQuestionIdx(0);
-      } else {
-        setIsReview(true);
-      }
-    }, 380);
-  };
-
-  const goNext = () => {
+  const goNext = useCallback(() => {
     if (questionIdx < section.questions.length - 1) { setDirection('right'); setQuestionIdx(q => q + 1); }
     else if (sectionIdx < SECTIONS.length - 1) { setDirection('right'); setSectionIdx(s => s + 1); setQuestionIdx(0); }
     else setIsReview(true);
-  };
+  }, [questionIdx, sectionIdx, section.questions.length]);
 
-  const goBack = () => {
+  const goBack = useCallback(() => {
     if (isReview) { setIsReview(false); return; }
     if (questionIdx > 0) { setDirection('left'); setQuestionIdx(q => q - 1); }
     else if (sectionIdx > 0) { setDirection('left'); setSectionIdx(s => s - 1); setQuestionIdx(SECTIONS[sectionIdx - 1].questions.length - 1); }
     else navigate('/student');
-  };
+  }, [isReview, questionIdx, sectionIdx, navigate]);
 
-  const handleSubmit = async () => {
+  const handleAnswer = useCallback((key, value) => {
+    setAnswers(prev => ({ ...prev, [key]: value }));
+    setTimeout(() => {
+      goNext();
+    }, 380);
+  }, [goNext]);
+
+  const handleSubmit = useCallback(async () => {
     if (!isAllAnswered()) { toast.error('Please answer all questions'); return; }
     setIsLoading(true);
     try {
@@ -216,7 +210,7 @@ const WellnessAssessment = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [answers, notes, navigate, updateStudentProfile, isAllAnswered]);
 
   // Section mini-nav dots
   const globalQIndex = SECTIONS.slice(0, sectionIdx).reduce((s, sec) => s + sec.questions.length, 0) + questionIdx;
