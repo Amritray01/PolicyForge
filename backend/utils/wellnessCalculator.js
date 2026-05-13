@@ -88,17 +88,41 @@ function calculateFinalWellnessScore(sections) {
 /**
  * Map final score (0-100) to a wellness status label
  * Higher score = more concern
+ * FINAL STATUS LEVELS:
+ * 0–20 → Excellent
+ * 21–40 → Stable
+ * 41–60 → Initial Risk
+ * 61–80 → High Risk
+ * 81–100 → Critical
  */
 function getWellnessStatus(score) {
   if (score <= 20) return { label: 'Excellent', color: '#10B981' };
   if (score <= 40) return { label: 'Stable', color: '#34D399' };
-  if (score <= 60) return { label: 'Moderate Concern', color: '#FBBF24' };
-  if (score <= 80) return { label: 'High Stress', color: '#F97316' };
+  if (score <= 60) return { label: 'Initial Risk', color: '#FBBF24' };
+  if (score <= 80) return { label: 'High Risk', color: '#F97316' };
   return { label: 'Critical', color: '#EF4444' };
+}
+
+/**
+ * Map lifestyle score (0-100) to a lifestyle-specific status label
+ * Used for the Lifestyle domain scoring
+ * 0–20 → Healthy
+ * 21–40 → Stable
+ * 41–60 → Imbalanced
+ * 61–80 → Unhealthy
+ * 81–100 → Severe Lifestyle Risk
+ */
+function getLifestyleStatus(score) {
+  if (score <= 20) return { label: 'Healthy', color: '#10B981' };
+  if (score <= 40) return { label: 'Stable', color: '#34D399' };
+  if (score <= 60) return { label: 'Imbalanced', color: '#FBBF24' };
+  if (score <= 80) return { label: 'Unhealthy', color: '#F97316' };
+  return { label: 'Severe Lifestyle Risk', color: '#EF4444' };
 }
 
 module.exports = {
   calculateSectionScores,
   calculateFinalWellnessScore,
   getWellnessStatus,
+  getLifestyleStatus,
 };

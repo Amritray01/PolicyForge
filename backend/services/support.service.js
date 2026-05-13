@@ -71,11 +71,12 @@ const updateTicket = async (ticketId, { status, adminNotes }) => {
 };
 
 /**
- * Get count of open/escalated tickets (for admin badge)
+ * Get count of unresolved tickets (for admin badge)
+ * Counts all tickets that are not RESOLVED (includes OPEN, IN_PROGRESS, ESCALATED)
  */
 const getPendingCount = async () => {
   return await prisma.supportTicket.count({
-    where: { status: { in: ['OPEN', 'ESCALATED'] } },
+    where: { status: { not: 'RESOLVED' } },
   });
 };
 

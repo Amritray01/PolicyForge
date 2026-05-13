@@ -34,11 +34,11 @@ const AuroraBackground = () => (
 
 // ── Wellness score → status ────────────────────────────────────────────────
 const getWellnessStatus = (score) => {
-  if (score <= 20) return { label: 'Excellent', color: '#63d33eff' };
+  if (score <= 20) return { label: 'Excellent', color: '#10B981' };
   if (score <= 40) return { label: 'Stable', color: '#34D399' };
-  if (score <= 60) return { label: 'Moderate Concern', color: '#FBBF24' };
-  if (score <= 80) return { label: 'High Stress', color: '#e27f29b9' };
-  return { label: 'Critical', color: '#cc1212ff' };
+  if (score <= 60) return { label: 'Initial Risk', color: '#FBBF24' };
+  if (score <= 80) return { label: 'High Risk', color: '#F97316' };
+  return { label: 'Critical', color: '#EF4444' };
 };
 
 const getMotivationalMessage = (score) => {
@@ -308,8 +308,8 @@ const StudentDashboard = () => {
                     {[
                       { label: 'Excellent', range: '0–20', color: '#10B981' },
                       { label: 'Stable', range: '21–40', color: '#34D399' },
-                      { label: 'Moderate Concern', range: '41–60', color: '#FBBF24' },
-                      { label: 'High Stress', range: '61–80', color: '#F97316' },
+                      { label: 'Initial Risk', range: '41–60', color: '#FBBF24' },
+                      { label: 'High Risk', range: '61–80', color: '#F97316' },
                       { label: 'Critical', range: '81–100', color: '#EF4444' },
                     ].map(({ label, range, color }) => (
                       <div key={label} className="flex items-center gap-3 p-2.5 rounded-xl transition-all"

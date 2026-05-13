@@ -164,8 +164,8 @@ const AdminDashboard = () => {
   const getWellnessLabel = (score) => {
     if (score <= 20) return 'Excellent';
     if (score <= 40) return 'Stable';
-    if (score <= 60) return 'Concern';
-    if (score <= 80) return 'High Stress';
+    if (score <= 60) return 'Initial Risk';
+    if (score <= 80) return 'High Risk';
     return 'Critical';
   };
 
@@ -174,7 +174,7 @@ const AdminDashboard = () => {
       .filter((s) => {
         const score = s.currentWellnessScore || 0;
         if (filterRisk === 'critical' && score <= 80) return false;
-        if (filterRisk === 'concern' && (score <= 40 || score > 80)) return false;
+        if (filterRisk === 'attention' && (score <= 40 || score > 60)) return false;
         if (filterRisk === 'stable' && score > 40) return false;
         if (searchTerm.trim()) {
           const t = searchTerm.toLowerCase();
@@ -187,8 +187,8 @@ const AdminDashboard = () => {
 
   const wellnessPieData = React.useMemo(() => {
     if (!students?.length) return [];
-    const bands = { Excellent: 0, Stable: 0, Concern: 0, 'High Stress': 0, Critical: 0 };
-    const colors = { Excellent: '#63d33eff', Stable: '#34D399', Concern: '#FBBF24', 'High Stress': '#F97316', Critical: '#EF4444' };
+    const bands = { Excellent: 0, Stable: 0, 'Initial Risk': 0, 'High Risk': 0, Critical: 0 };
+    const colors = { Excellent: '#10B981', Stable: '#34D399', 'Initial Risk': '#FBBF24', 'High Risk': '#F97316', Critical: '#EF4444' };
     students.forEach(s => { const lbl = getWellnessLabel(s.currentWellnessScore || 0); bands[lbl]++; });
     return Object.entries(bands).filter(([, v]) => v > 0).map(([name, value]) => ({ name, value, color: colors[name] }));
   }, [students]);
@@ -204,7 +204,7 @@ const AdminDashboard = () => {
     ];
   }, [domainAverages]);
 
-  const openTickets = tickets.filter(t => t.status === 'OPEN' || t.status === 'ESCALATED').length;
+  const openTickets = tickets.filter(t => t.status !== 'RESOLVED').length;
 
   if (loading) {
     return (
@@ -346,8 +346,8 @@ const AdminDashboard = () => {
                   </div>
                   <select value={filterRisk} onChange={(e) => setFilterRisk(e.target.value)} className="px-4 py-2.5 text-sm bg-white/8 border border-white/12 rounded-xl text-white outline-none cursor-pointer glow-input">
                     <option value="all">All Wellness Levels</option>
-                    <option value="critical">🔴 High Stress / Critical</option>
-                    <option value="concern">🟡 Moderate Concern</option>
+                    <option value="critical">🔴 High Risk / Critical</option>
+                    <option value="attention">🟡 Initial Risk</option>
                     <option value="stable">🟢 Stable / Excellent</option>
                   </select>
                   <div className="text-xs text-white/30 self-center font-mono px-2">{filteredStudents.length} records</div>
