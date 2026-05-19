@@ -107,7 +107,7 @@ const Login = () => {
   const { login } = useAuth(); // AuthContext
 
   const tagline = useTypewriter([
-    'Empowering student wellness.',
+    'Campus Wellness.',
     'Early support. Better outcomes.',
     'Mental health, tracked with care.',
   ]);
