@@ -74,11 +74,11 @@ const FloatingInput = ({ type: initialType, value, onChange, placeholder, icon: 
           onBlur={() => setFocused(false)}
           required={required}
           autoComplete={autoComplete}
-          className="w-full bg-transparent px-11 py-4 text-white placeholder-transparent tracking-wide outline-none focus:ring-0 relative z-10"
+          className="w-full bg-transparent px-11 py-4 text-white text-lg placeholder-transparent tracking-wide outline-none focus:ring-0 relative z-10"
           placeholder={placeholder}
         />
         <span 
-          className={`absolute left-11 transition-all duration-300 pointer-events-none text-gray-400 ${active ? 'top-2 text-[10px] uppercase tracking-wider font-semibold text-blue-300' : 'top-1/2 -translate-y-1/2 text-sm'}`}
+          className={`absolute left-11 transition-all duration-300 pointer-events-none text-gray-400 ${active ? 'top-2 text-xs uppercase tracking-wider font-semibold text-blue-300' : 'top-1/2 -translate-y-1/2 text-lg'}`}
         >
           {placeholder}
         </span>
@@ -143,7 +143,7 @@ const Login = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden font-sans bg-[#050B14]">
+    <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden font-cursive-italic bg-[#050B14]">
       <AuroraBackground />
 
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-12 flex flex-col lg:flex-row items-center gap-16">
@@ -158,24 +158,27 @@ const Login = () => {
           <div className="inline-flex items-center justify-center p-3 sm:p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl mb-6">
             <ShieldCheck size={36} className="text-blue-400" />
           </div>
-          <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight">
+          <h1 className="text-6xl lg:text-8xl font-extrabold tracking-tight leading-tight">
             Well-being <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-orange-400 to-red-500">Portal</span>
           </h1>
-          <p className="text-xl lg:text-2xl font-light text-gray-300 h-8">
-            {tagline}<motion.span animate={{ opacity: [1, 0, 1] }} transition={{ repeat: Infinity, duration: 0.8 }} className="pl-1 text-blue-400">|</motion.span>
+          <p className="text-3xl lg:text-4xl text-gray-300 h-12 flex items-center">
+            <span className="font-cursive-italic tagline-blue-glow inline-block leading-normal">
+              {tagline}
+            </span>
+            <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ repeat: Infinity, duration: 0.8 }} className="pl-1 text-blue-400 font-bold">|</motion.span>
           </p>
 
           <ul className="space-y-4 pt-4">
-            {['PHQ-9 clinical assessments', 'Real-time risk monitoring', 'Secure student records', 'Anonymous counseling links'].map((feature, idx) => (
+            {['Mental wellness', 'Academic stress', 'Hostel/mess satisfaction', 'Placement readiness stress', 'Lifestyle & engagement wellness'].map((feature, idx) => (
               <motion.li 
                 key={idx}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6 + idx * 0.15 }}
-                className="flex items-center space-x-3 text-gray-400 text-lg"
+                className="flex items-center space-x-3 text-gray-400 text-xl"
               >
-                <Zap size={18} className="text-orange-400" />
+                <Zap size={20} className="text-orange-400" />
                 <span>{feature}</span>
               </motion.li>
             ))}
@@ -195,8 +198,8 @@ const Login = () => {
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-50" />
             
             <div className="mb-10 text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">Secure Sign In</h2>
-              <p className="text-gray-400">Access your dashboard</p>
+              <h2 className="text-3xl font-bold text-white mb-2">Secure Sign In</h2>
+              <p className="text-gray-400 text-lg">Access your dashboard</p>
             </div>
 
             <AnimatePresence>
@@ -245,7 +248,7 @@ const Login = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isLoading || !email || !password}
-                className="w-full py-4 mt-2 bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-500 hover:to-orange-400 text-white rounded-xl font-bold tracking-wide shadow-lg disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden transition-all"
+                className="w-full py-5 mt-2 text-lg bg-gradient-to-r from-blue-600 to-orange-500 hover:from-blue-500 hover:to-orange-400 text-white rounded-xl font-bold tracking-wide shadow-lg disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden transition-all"
               >
                 {isLoading ? (
                   <motion.div 

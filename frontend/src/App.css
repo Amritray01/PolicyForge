@@ -2,8 +2,6 @@
    WELL-BEING PORTAL — Production Design System  v2
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
-
 :root {
   --font-body: 'Sora', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -119,6 +117,24 @@ nav.glass::after {
 /* ── typography ── */
 h1,h2,h3,h4,h5,h6 { font-family: var(--font-body); font-weight: 700; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1.2; }
 .font-mono { font-family: var(--font-mono) !important; letter-spacing: 0.02em; }
+.font-cursive-italic {
+  font-family: 'Dancing Script', 'Caveat', 'Playfair Display', cursive, sans-serif !important;
+  font-style: italic !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+}
+.tagline-blue-glow {
+  background: linear-gradient(135deg, #60a5fa 10%, #22d3ee 50%, #fb923c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(34, 211, 238, 0.2);
+}
+.tagline-pink-glow {
+  background: linear-gradient(135deg, #a5b4fc 10%, #ec4899 60%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(236, 72, 153, 0.2);
+}
 
 /* ── forms ── */
 input[type="text"], input[type="email"], input[type="password"], input[type="number"], select, textarea {
